@@ -133,3 +133,5 @@ dmypy.json
 
 # Custom
 experiments/pipeline
+experiments/todo.ipynb
+experiments/temp
