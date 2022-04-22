@@ -41,7 +41,7 @@ def _gzip_reader_fn(filenames):
 
 def _input_fn(file_pattern,
               tf_transform_output,
-              num_epochs=1,
+              num_epochs=None,
               batch_size=32) -> tf.data.Dataset:
     """Create batches of features and labels from TF Records
 
@@ -68,33 +68,6 @@ def _input_fn(file_pattern,
         label_key=_transformed_name(_LABEL_KEY))
 
     return dataset
-
-
-def _get_serve_tf_examples_fn(model, tf_transform_output):
-    """Returns a function that parses a serialized tf.Example and applies TFT."""
-
-    # Get transformation graph
-    model.tft_layer = tf_transform_output.transform_features_layer()
-
-    @tf.function
-    def serve_tf_examples_fn(serialized_tf_examples):
-        """Returns the output to be used in the serving signature."""
-        # Get pre-transform feature spec
-        feature_spec = tf_transform_output.raw_feature_spec()
-
-        # Pop label since serving inputs do not include the label
-        feature_spec.pop(_LABEL_KEY)
-
-        # Parse raw examples into a dictionary of tensors matching the feature spec
-        parsed_features = tf.io.parse_example(serialized_tf_examples, feature_spec)
-
-        # Transform the raw examples using the transform graph
-        transformed_features = model.tft_layer(parsed_features)
-
-        # Get predictions using the transformed features
-        return model(transformed_features)
-
-    return serve_tf_examples_fn
 
 
 def _model_builder(hp):
@@ -169,14 +142,12 @@ def tuner_fn(fn_args: FnArgs) -> None:
                      directory=fn_args.working_dir,
                      project_name='kt_hyperband')
     
-#     model.compile(optimizer=keras.optimizers.Adam(learning_rate=lr),
-#                   loss="binary_crossentropy",
-#                   metrics=[tf.keras.metrics.BinaryAccuracy()])
-    
     # Load transform output
     tf_transform_output = tft.TFTransformOutput(fn_args.transform_graph_path)
-
-    train_set = _input_fn(fn_args.train_files[0], tf_transform_output)  # 여기서 받아올 epochs 설정되어 데이터 순회됨
+    
+    # epochs 설정할 수 있는데 steps 쓰면 steps이 epochs*원래스탭 보다 클 수도 있으므로 None인 기본값으로 해 계속 순회하도록 함
+    # train_steps, eval_steps을 안 쓰고 epochs으로 조정하는 방법도 있음
+    train_set = _input_fn(fn_args.train_files[0], tf_transform_output)  
     val_set = _input_fn(fn_args.eval_files[0], tf_transform_output)
     
     return TunerFnResult(
