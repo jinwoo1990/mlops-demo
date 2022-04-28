@@ -13,6 +13,10 @@
 # limitations under the License.
 
 
+import os
+from dotenv import load_dotenv
+
+
 PIPELINE_NAME = 'advert_pipeline'
 
 # 기본 GCP 설정
@@ -26,25 +30,24 @@ try:
 except ImportError:
     GOOGLE_CLOUD_PROJECT = ''
 # Storage 이름 설정
-# TODO: GCS bucket 정해놓고 쓰기 (설정에도 해야 됨)
-# GCS_BUCKET_NAME = GOOGLE_CLOUD_PROJECT + '-kubeflowpipelines-default'  # default
-GCS_BUCKET_NAME = GOOGLE_CLOUD_PROJECT + '-kubeflow-storage'
+# GCS_PIPELINE_BUCKET_NAME = GOOGLE_CLOUD_PROJECT + '-kubeflowpipelines-default'  # default
+GCS_PIPELINE_BUCKET_NAME = GOOGLE_CLOUD_PROJECT + '-pipelines'
+GCS_DATA_BUCKET_NAME = GOOGLE_CLOUD_PROJECT + '-data'
+GCS_SERVING_BUCKET_NAME = GOOGLE_CLOUD_PROJECT + '-serving'
 # Region 설정
 GOOGLE_CLOUD_REGION = 'us-central1-a'
 # 파이프라인 이미지 빌드할 registry 경로
 # This image will be automatically built by CLI if we use --build-image flag.
 PIPELINE_IMAGE = f'gcr.io/{GOOGLE_CLOUD_PROJECT}/{PIPELINE_NAME}'
 
-# TFX 설정
-# Function 경로
-PREPROCESSING_FN = 'models.preprocessing.preprocessing_fn'
-RUN_FN = 'models.keras_model.model.run_fn'
-# Trainer 파라미터
-TRAIN_NUM_STEPS = 1000
-EVAL_NUM_STEPS = 150
-# Evaluator 파라미터
-# EVAL_ACCURACY_THRESHOLD = 0.6  # blessed model 판단
-
+# Metadata 설정
+# 비밀번호가 포함되어 따로 관리
+load_dotenv()  # load secret env
+MYSQL_HOST = os.environ.get('MYSQL_HOST')
+MYSQL_PORT = os.environ.get('MYSQL_PORT')
+MYSQL_DATABASE = os.environ.get('MYSQL_DATABASE')
+MYSQL_USERNAME = os.environ.get('MYSQL_USERNAME')
+MYSQL_PASSWORD = os.environ.get('MYSQL_PASSWORD')
 
 # TODO: csv -> mysql로 변경하면서 수정
 # 데이터 쿼리 설정
@@ -92,7 +95,13 @@ _query_sample_rate = 0.0001  # Generate a 0.01% random sample.
 #           < {query_sample_rate}""".format(
 #    query_sample_rate=_query_sample_rate)
 
-
+# TFX 설정
+# Function 경로
+PREPROCESSING_FN = 'models.preprocessing.preprocessing_fn'
+RUN_FN = 'models.keras_model.model.run_fn'
+# Trainer 파라미터
+TRAIN_NUM_STEPS = 1000
+EVAL_NUM_STEPS = 150
 # Evaluator 설정
 EVAL_CONFIG = """
   ## Model information

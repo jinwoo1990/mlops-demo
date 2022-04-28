@@ -20,11 +20,6 @@ from tfx import v1 as tfx
 from pipeline import configs
 from pipeline import pipeline
 
-# TFX pipeline produces many output files and metadata. All output data will be
-# stored under this OUTPUT_DIR.
-# NOTE: It is recommended to have a separated OUTPUT_DIR which is *outside* of
-#       the source code structure. Please change OUTPUT_DIR to other location
-#       where we can store outputs of the pipeline.
 HOME_DIR = os.path.expanduser('~')
 OUTPUT_DIR = os.path.join(HOME_DIR, 'temp/tfx-output')
 try:
@@ -56,8 +51,17 @@ DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 
 
 def run():
+    metadata_config = tfx.orchestration.metadata.sqlite_metadata_connection_config(
+        METADATA_PATH)  # local 경로로 할 때
+    # metadata_config = tfx.orchestration.metadata.mysql_metadata_connection_config(
+    #     host=configs.MYSQL_HOST,
+    #     port=configs.MYSQL_PORT,
+    #     database=configs.MYSQL_DATABASE,
+    #     username=configs.MYSQL_USERNAME,
+    #     password=configs.MYSQL_PASSWORD)
+
     tfx.orchestration.LocalDagRunner().run(
-      pipeline.create_pipeline(
+        pipeline.create_pipeline(
           pipeline_name=configs.PIPELINE_NAME,
           pipeline_root=PIPELINE_ROOT,
           data_path=DATA_PATH,
@@ -67,8 +71,8 @@ def run():
           eval_args=tfx.proto.EvalArgs(num_steps=configs.EVAL_NUM_STEPS),
           eval_config=configs.EVAL_CONFIG,
           serving_model_dir=SERVING_MODEL_DIR,
-          metadata_connection_config=tfx.orchestration.metadata
-          .sqlite_metadata_connection_config(METADATA_PATH)))
+          metadata_connection_config=metadata_config)
+    )
 
 
 if __name__ == '__main__':
