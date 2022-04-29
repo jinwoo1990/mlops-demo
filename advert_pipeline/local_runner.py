@@ -47,7 +47,7 @@ SERVING_MODEL_DIR = os.path.join(PIPELINE_ROOT, 'serving_model')
 #       Kubeflow), you can use a path starting "gs://YOUR_BUCKET_NAME/path" for
 #       DATA_PATH. For example,
 #       DATA_PATH = 'gs://bucket/chicago_taxi_trips/csv/'.
-DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/csv')
 
 
 def run():
@@ -64,6 +64,7 @@ def run():
         pipeline.create_pipeline(
           pipeline_name=configs.PIPELINE_NAME,
           pipeline_root=PIPELINE_ROOT,
+          query='None',
           data_path=DATA_PATH,
           preprocessing_fn=configs.PREPROCESSING_FN,
           run_fn=configs.RUN_FN,

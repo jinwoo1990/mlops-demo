@@ -25,14 +25,14 @@ from ml_metadata.proto import metadata_store_pb2
 def create_pipeline(
     pipeline_name: str,
     pipeline_root: str,
-    data_path: str,
-    # query: str,  # either data_path or query can be used for ingesting data  # TODO: query로 변경
+    query: str,  # either data_path or query can be used for ingesting data
     preprocessing_fn: str,
     run_fn: str,
     train_args: tfx.proto.TrainArgs,
     eval_args: tfx.proto.EvalArgs,
     eval_config: str,
     serving_model_dir: str,
+    data_path: Optional[str] = None,
     schema_path: Optional[str] = None,
     metadata_connection_config: Optional[
         metadata_store_pb2.ConnectionConfig] = None,
@@ -41,9 +41,11 @@ def create_pipeline(
     components = []
 
     # Ingests data.
-    example_gen = tfx.components.CsvExampleGen(input_base=data_path)  # Csv
-    # example_gen = tfx.extensions.google_cloud_big_query.BigQueryExampleGen(
-    #     query=query)  # BigQuery
+    if data_path:
+        example_gen = tfx.components.CsvExampleGen(input_base=data_path)  # Csv
+    else:
+        example_gen = tfx.extensions.google_cloud_big_query.BigQueryExampleGen(
+            query=query)  # BigQuery
     components.append(example_gen)
 
     # Computes statistics.

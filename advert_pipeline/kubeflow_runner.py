@@ -75,9 +75,8 @@ def run():
         pipeline.create_pipeline(
             pipeline_name=configs.PIPELINE_NAME,
             pipeline_root=PIPELINE_ROOT,
-            data_path=DATA_PATH,
-            # TODO(step 7): (Optional) Uncomment below to use BigQueryExampleGen.
-            # query=configs.BIG_QUERY_QUERY,
+            # data_path=DATA_PATH,
+            query=configs.BIG_QUERY_QUERY,
             # TODO: (Optional) Set the path of the customized schema.
             # schema_path=generated_schema_path,
             preprocessing_fn=configs.PREPROCESSING_FN,
@@ -86,9 +85,7 @@ def run():
             eval_args=tfx.proto.EvalArgs(num_steps=configs.EVAL_NUM_STEPS),
             eval_config=configs.EVAL_CONFIG,
             serving_model_dir=SERVING_MODEL_DIR,
-            # TODO(step 7): (Optional) Uncomment below to use provide GCP related
-            #               config for BigQuery with Beam DirectRunner.
-            # beam_pipeline_args=configs.BIG_QUERY_WITH_DIRECT_RUNNER_BEAM_PIPELINE_ARGS
+            beam_pipeline_args=configs.BIG_QUERY_WITH_DIRECT_RUNNER_BEAM_PIPELINE_ARGS
         ))
 
 
