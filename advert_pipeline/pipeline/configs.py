@@ -120,14 +120,9 @@ EVAL_CONFIG = """
 
   ## Slicing information
   slicing_specs {}  # overall slice
-  slicing_specs {
-    feature_keys: ["Male"]
-  }
-  slicing_specs {
-    feature_values: {
-      key: "Country"
-      value: "Senegal"}
-  }
+  # slicing_specs {
+  #   feature_keys: ["Male"]
+  # }
   # slicing_specs {
   #   feature_keys: ["Male", "Age"]
   # }
