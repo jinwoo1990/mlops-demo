@@ -147,6 +147,7 @@ def _wide_and_deep_classifier(hidden_units):
     combined = keras.layers.concatenate([wide, deep], name='combined')
     # output 만들기
     output = tf.keras.layers.Dense(1, activation='sigmoid', name='output')(combined)
+    # output = tf.squeeze(output, -1)
     # input layers와 output을 넣어 model 만들기
     # 이런 식으로 만들면 input layer에서 분리되서 wide, deep 나뉘고 다시 output으로 합쳐지게 깔끔하게 나옴
     input_layers = input_numeric + input_categorical

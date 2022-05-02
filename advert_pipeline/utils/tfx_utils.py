@@ -7,42 +7,15 @@ import tensorflow_data_validation as tfdv
 from tensorflow_metadata.proto.v0 import anomalies_pb2
 from tensorflow_data_validation.utils import io_util
 from google.cloud import storage
-
-
-def csv_to_parquet(path):
-    for item in ['advert_1', 'advert_2', 'advert_3']:
-        df = pd.read_csv(os.path.join(path, 'csv/%s.csv' % item))
-        df.to_parquet(os.path.join(path, 'parquet/%s.parquet' % item))
-
-
-# 이 방식으로 바꾸면 문제 생김. 그냥 쿼리에서 처리하는 것이 나아 보임
-def change_parquet_datetime(path):
-    now = datetime.datetime.now(timezone('Asia/Seoul'))
-    print(now)
-    first_file = pd.read_parquet(os.path.join(path, 'advert_1.parquet'))
-    base = pd.to_datetime(first_file['Timestamp'].loc[0])
-    base = datetime.datetime(base.year, base.month, base.day, tzinfo=timezone('Asia/Seoul'))
-    print(base)
-    print((now - base).days)
-
-    day_delta = now.day - base.day
-    print(day_delta)
-    for item in ['advert_1', 'advert_2', 'advert_3']:
-        df_parquet = pd.read_parquet(os.path.join(path, '%s.parquet' % item))
-        print(df_parquet.head())
-        df_parquet['Timestamp'] = pd.to_datetime(df_parquet['Timestamp'])
-        df_parquet['Timestamp'] = df_parquet['Timestamp'] + datetime.timedelta(days=day_delta)
-        # 2022-05-01T23:46:51Z
-        # BigQueryExample does not support timestamp type
-        df_parquet['Timestamp'] = df_parquet['Timestamp'].astype('str')
-        df_parquet.to_parquet(os.path.join(path, '%s.parquet' % item))
-        print(df_parquet.head())
-        print(df_parquet.info())
+from tensorflow_model_analysis.proto import config_pb2
+from tensorflow_model_analysis.proto import metrics_for_slice_pb2
+from tensorflow_model_analysis.proto import validation_result_pb2
+import gcsfs
+import json
+import re
 
         
 def parse_bucket_name_prefix(bucket_uri):
-    import re
-    
     pat = re.compile('gs:\/\/([\w\-\_]+)/(\S+)')
     mat = pat.search(bucket_uri)
     
@@ -60,7 +33,7 @@ def list_bucket_uri_dir(bucket_uri):
     return res
 
 
-def load_sample_tfrecord_from_uri(uri, sample_number, compression_type="GZIP"):
+def print_sample_tfrecord_from_uri(uri, sample_number, compression_type="GZIP"):
     if uri.startswith('gs://'):
         tfrecord_filenames = list_bucket_uri_dir(uri)
     else:
@@ -141,6 +114,93 @@ def load_anomalies_from_uri(uri):
     
     return result
 
+
+def load_eval_attribution_from_uri(uri):
+    data = tf.data.TFRecordDataset(uri)
+    
+    for item in data:
+        attribution = metrics_for_slice_pb2.AttributionsForSlice.FromString(item.numpy())
+        print(attribution)
+
+        
+def load_eval_result_from_uri(uri):
+    """
+    합쳐진 전체 결과 나옴
+    개별 파일 uri 아닌 evaluation uri 입력
+    개별 요소 확인
+    result.attributions
+    result.config
+    result.data_location
+    result.model_location
+    result.file_format
+    result.plots
+    result.slicing_metrics
+    참고로 blessed는 splits들의 metrics 결과들을 모두 보고 판단
+    """
+    result = tfma.load_eval_result(uri)
+    # tfma.view.render_slicing_metrics(eval_result, slicing_spec = tfma.slicer.SingleSliceSpec())
+    
+    return result
+
+
+def load_eval_config_from_uri(uri):
+    gcs_file_system = gcsfs.GCSFileSystem()
+    
+    with gcs_file_system.open(uri) as f:
+        json_dict = json.load(f)
+    return json_dict
+
+
+def load_blessing_from_uri(uri):
+    if uri.startswith('gs://'):
+        file_name = list_bucket_uri_dir(uri)[1]  # list_bucket_uri_dir 자기 자신 경로 때문에 1로
+        file_path = file_name
+    else:
+        file_name = os.listdir(uri)[0]
+        file_path = os.path.join(uri, file_name)
+    
+    pat = re.compile(uri+'/(\S+)')
+    mat = pat.search(a)
+    
+    return mat.group(1)
+
+
+def print_eval_attribution_from_uri(uri):
+    data = tf.data.TFRecordDataset(uri)
+    
+    for item in data:
+        line = metrics_for_slice_pb2.AttributionsForSlice.FromString(item.numpy())
+        print(line)
+        
+
+def print_eval_metrics_from_uri(uri):
+    """
+    같은 metrics라도 candidate, baseline 쌍의 결과가 [값, 차이값, example_weight 적용값] 3가지로 나옴
+    example_weight은 설정 안하면 일반 값이랑 똑같이 나옴
+    https://www.tensorflow.org/tfx/model_analysis/metrics (metrics 설정 참조)
+    """
+    data = tf.data.TFRecordDataset(uri)
+    
+    for item in data:
+        line = metrics_for_slice_pb2.MetricsForSlice.FromString(item.numpy())
+        print(line)
+
+        
+def print_eval_plots_from_uri(uri):
+    data = tf.data.TFRecordDataset(uri)
+    
+    for item in data:
+        line = metrics_for_slice_pb2.PlotsForSlice.FromString(item.numpy())
+        print(line)
+        
+
+def print_eval_validations_from_uri(uri):
+    data = tf.data.TFRecordDataset(uri)
+    
+    for item in data:
+        line = validation_result_pb2.ValidationResult.FromString(item.numpy())
+        print(line)
+        
 
 if __name__ == '__main__':
     print('')
