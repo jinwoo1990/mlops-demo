@@ -58,7 +58,10 @@ BIG_QUERY_WITH_DIRECT_RUNNER_BEAM_PIPELINE_ARGS = [
    '--temp_location=' + os.path.join('gs://', GCS_DATA_BUCKET_NAME, 'tmp'),
    ]
 DATETIME_NOW = datetime.datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d')
-BIG_QUERY_TABLE = '%s.advertising.advert_2022' % GOOGLE_CLOUD_PROJECT
+# 데이터 시간이 안 맞을 수 있으니 advert_2022_modified로 바꾸고 utils function 활용해 날짜 맞추기
+# from advert_pipeline.utils import bigquery_utils
+# bigquery_utils.create_table_from_query(NEW_QUERY, NEW_BIGQUERY_TABLE)
+BIG_QUERY_TABLE = '%s.advertising.advert_2022_modified' % GOOGLE_CLOUD_PROJECT
 BIG_QUERY_QUERY = """
         SELECT 
             DailyTimeSpentOnSite, 

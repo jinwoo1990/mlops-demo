@@ -111,6 +111,6 @@ def create_table_from_query(query, dest_table):
 if __name__ == '__main__':
     print('')
     print(NEW_QUERY)
-    # get_query_result(VIEW_QUERY, 1)
-    # create_table_from_query(VIEW_QUERY, NEW_BIGQUERY_TABLE)
+    # get_query_result(NEW_QUERY, 1)
+    # create_table_from_query(NEW_QUERY, NEW_BIGQUERY_TABLE)
     
