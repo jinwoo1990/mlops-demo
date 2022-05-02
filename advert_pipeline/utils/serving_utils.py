@@ -12,6 +12,32 @@ from google.protobuf import text_format
 # saved_model 모든 구성요소 확인
 # !saved_model_cli show --dir {MODEL_DIR} --all
 
+# Google Compute Engine에 docker 설치
+# 리눅스 업데이트
+# $sudo apt-get update
+# $sudo apt-get upgrade$sudo usermod -a -G docker ${USER}udo usermod -a -G docker ${USER}
+#Docker 설치
+# $sudo curl -fsSL https://get.docker.com/ | sudo sh
+#sudo 제외하고 docker 실행 가능 하도록 변경
+# $sudo usermod -a -G docker ${USER}
+
+# docker를 활용한 tfserving server 띄우기
+# docker pull tensorflow/serving 커맨드를 통해 설치
+# MODEL_PATH를 원하는 값으로 변경
+# serving_model 경로 안에 advert_pipeline이라는 경로에 모델에 있어야 작동 (MODEL_NAME 설정 안 하면 기본 값 model인데 디렉토리 없으면 작동 안 함
+example_tfservering_init_command = '''
+docker run -p 8501:8501 -e MODEL_BASE_PATH=gs://project-111111-serving/serving_model -e MODEL_NAME=advert_pipeline -t tensorflow/serving
+'''
+
+# command 치는 경로에 test.json 파일 필요
+# ip 주소는 cloud compute와 동일 네트워크에서 작업 (노트북)이면 내부/외부 ip 주소 모두 가능하나 그 외에서 접근하려면 외부 주소 활용
+# 8501이든 열어놓은 포트에 대해 방화벽 규칙 추가 필요
+example_post_command = '''
+curl -X POST http://<ip>:8501/v1/models/advert_pipeline:predict \
+    -d @./test.json \
+    -H "Content-Type: application/json"
+'''
+
 
 example_text = '''
 features {
@@ -135,6 +161,7 @@ def infer_using_signature(loaded, signature, examples):
 def post_tfserving_request(url, data):
     headers = {"content-type": "application/json"}
     json_response = requests.post(url, data=data, headers=headers)
+    print(json_response)
     predictions = np.array(json.loads(json_response.text)["predictions"])
     return predictions
 
