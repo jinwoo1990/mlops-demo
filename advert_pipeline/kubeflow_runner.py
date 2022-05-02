@@ -23,7 +23,8 @@ from pipeline import pipeline
 PIPELINE_ROOT = os.path.join('gs://', configs.GCS_PIPELINE_BUCKET_NAME, 'tfx_pipeline_output',
                              configs.PIPELINE_NAME)
 # SERVING_MODEL_DIR = os.path.join(PIPELINE_ROOT, 'serving_model')
-SERVING_MODEL_DIR = os.path.join('gs://', configs.GCS_SERVING_BUCKET_NAME, 'serving_model', configs.PIPELINE_NAME)  # Deploy 환경이 참조할 경로
+SERVING_MODEL_NAME = 'advert_classifier'
+SERVING_MODEL_DIR = os.path.join('gs://', configs.GCS_SERVING_BUCKET_NAME, 'serving_model', SERVING_MODEL_NAME)  # Deploy 환경이 참조할 경로
 DATA_PATH = 'gs://{}/data/advertising/'.format(configs.GCS_DATA_BUCKET_NAME)
 
 

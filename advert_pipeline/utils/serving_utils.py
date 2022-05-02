@@ -22,22 +22,21 @@ from google.protobuf import text_format
 # $sudo usermod -a -G docker ${USER}
 
 # docker를 활용한 tfserving server 띄우기
-# docker pull tensorflow/serving 커맨드를 통해 설치
+# docker pull tensorflow/serving:2.5.1 커맨드를 통해 설치 (2.5.1이 현 시점 latest)
 # MODEL_PATH를 원하는 값으로 변경
-# serving_model 경로 안에 advert_pipeline이라는 경로에 모델에 있어야 작동 (MODEL_NAME 설정 안 하면 기본 값 model인데 디렉토리 없으면 작동 안 함
+# serving_model 경로 안에 advert_classifier이라는 경로에 모델에 있어야 작동 (MODEL_NAME 설정 안 하면 기본 값 model인데 디렉토리 없으면 작동 안 함
 example_tfservering_init_command = '''
-docker run -p 8501:8501 -e MODEL_BASE_PATH=gs://project-111111-serving/serving_model -e MODEL_NAME=advert_pipeline -t tensorflow/serving
+docker run -p 8501:8501 -e MODEL_BASE_PATH=gs://project-111111-serving/serving_model -e MODEL_NAME=advert_classifier -t tensorflow/serving
 '''
 
 # command 치는 경로에 test.json 파일 필요
 # ip 주소는 cloud compute와 동일 네트워크에서 작업 (노트북)이면 내부/외부 ip 주소 모두 가능하나 그 외에서 접근하려면 외부 주소 활용
 # 8501이든 열어놓은 포트에 대해 방화벽 규칙 추가 필요
 example_post_command = '''
-curl -X POST http://<ip>:8501/v1/models/advert_pipeline:predict \
-    -d @./test.json \
+curl -X POST http://<ip>:8501/v1/models/advert_classifier:predict \
+    -d @./advert_test.json \
     -H "Content-Type: application/json"
 '''
-
 
 example_text = '''
 features {
