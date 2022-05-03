@@ -15,7 +15,7 @@ from google.protobuf import text_format
 # Google Compute Engine에 docker 설치
 # 리눅스 업데이트
 # $sudo apt-get update
-# $sudo apt-get upgrade$sudo usermod -a -G docker ${USER}udo usermod -a -G docker ${USER}
+# $sudo apt-get upgrade
 #Docker 설치
 # $sudo curl -fsSL https://get.docker.com/ | sudo sh
 #sudo 제외하고 docker 실행 가능 하도록 변경

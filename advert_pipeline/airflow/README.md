@@ -1,0 +1,26 @@
+## Airflow setting
+
+- Single Cloud Compute 리소스 위에 docker-compose로 배포
+- pip 설치
+    - `sudo apt update`
+    - `sudo apt install python3 python3-dev python3-venv`
+    - `sudo apt-get install wget`
+    - `wget https://bootstrap.pypa.io/get-pip.py`
+    - `sudo python3 get-pip.py`
+- 가상환경 활성화
+    - `cd your-project`
+    - `python3 -m venv env`
+    - `source env/bin/activate`
+- docker 설치
+    - `sudo curl -fsSL https://get.docker.com/ | sudo sh`
+    - `sudo usermod -a -G docker ${USER}`
+- docker-compose 설치
+    - `pip install docker-compose`
+- Airflow 설정
+    - `mkdir -p ./dags ./logs ./plugins`
+    - `echo -e "AIRFLOW_UID=$(id -u)" > .env`
+    - `pip install apache-airflow`
+- Airflow 시작
+    - `docker-compose up airflow-init`  # redis, postgres 생성 위한 init
+    - `docker-compose up -d`  # 실제 airflow 띄우기
+    - 기본 설정 id는 airflow, 비밀번호 airflow
