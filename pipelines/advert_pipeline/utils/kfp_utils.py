@@ -30,6 +30,7 @@ def create_custom_recurring_runs(host,
                                  start_time, 
                                  end_time, 
                                  cron_expression, 
+                                 pipeline_id,
                                  version_id, 
                                  no_catchup):
     client = kfp.Client(host)

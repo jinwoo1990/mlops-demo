@@ -16,10 +16,11 @@
 import os
 import datetime
 from pytz import timezone
-from dotenv import load_dotenv
 
 
-PIPELINE_NAME = 'advert_pipeline'
+PIPELINE_NAME_BASE = 'advert_pipeline'
+PIPELINE_NAME_DAILY = 'advert_pipeline_daily'
+PIPELINE_NAME_TUNER = 'advert_pipeline_tuner'
 
 # 기본 GCP 설정
 # Project 이름 불러오기
@@ -40,16 +41,8 @@ GCS_SERVING_BUCKET_NAME = GOOGLE_CLOUD_PROJECT + '-serving'
 GOOGLE_CLOUD_REGION = 'us-central1-a'
 # 파이프라인 이미지 빌드할 registry 경로
 # This image will be automatically built by CLI if we use --build-image flag.
-PIPELINE_IMAGE = f'gcr.io/{GOOGLE_CLOUD_PROJECT}/{PIPELINE_NAME}'
-
-# Metadata 설정
-# 비밀번호가 포함되어 따로 관리
-load_dotenv()  # load secret env
-MYSQL_HOST = os.environ.get('MYSQL_HOST')
-MYSQL_PORT = os.environ.get('MYSQL_PORT')
-MYSQL_DATABASE = os.environ.get('MYSQL_DATABASE')
-MYSQL_USERNAME = os.environ.get('MYSQL_USERNAME')
-MYSQL_PASSWORD = os.environ.get('MYSQL_PASSWORD')
+PIPELINE_IMAGE_DAILY = f'gcr.io/{GOOGLE_CLOUD_PROJECT}/{PIPELINE_NAME_DAILY}'
+PIPELINE_IMAGE_TUNER = f'gcr.io/{GOOGLE_CLOUD_PROJECT}/{PIPELINE_NAME_TUNER}'
 
 # 데이터 쿼리 설정
 # Beam args to use BigQueryExampleGen with Beam DirectRunner.
@@ -83,9 +76,10 @@ BIG_QUERY_QUERY = """
 # Function 경로
 PREPROCESSING_FN = 'models.preprocessing.preprocessing_fn'
 RUN_FN = 'models.keras_model.model.run_fn'
+TUNER_FN = 'models.keras_model.tuner.tuner_fn'
 # Trainer 파라미터
-TRAIN_NUM_STEPS = 1000
-EVAL_NUM_STEPS = 150
+TRAIN_NUM_STEPS = 100
+EVAL_NUM_STEPS = 50
 # Evaluator 설정
 EVAL_CONFIG = """
   ## Model information

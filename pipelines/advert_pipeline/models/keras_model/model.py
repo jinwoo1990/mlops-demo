@@ -176,7 +176,7 @@ def run_fn(fn_args: FnArgs) -> None:
 
     # Load best hyperparameters
     if fn_args.hyperparameters:
-        hp = fn_args.hyperparameters.get('values')  # TODO: Tuner
+        hp = fn_args.hyperparameters.get('values')  # Tuner 돌릴 때
     else:
         hp = {'units': constants.FIRST_UNITS,
               'decay': constants.DECAY_FACTOR}

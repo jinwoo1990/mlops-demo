@@ -112,5 +112,5 @@ if __name__ == '__main__':
     print('')
     print(NEW_QUERY)
     # get_query_result(NEW_QUERY, 1)
-    # create_table_from_query(NEW_QUERY, NEW_BIGQUERY_TABLE)
+    create_table_from_query(NEW_QUERY, NEW_BIGQUERY_TABLE)
     

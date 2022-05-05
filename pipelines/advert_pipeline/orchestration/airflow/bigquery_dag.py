@@ -22,7 +22,7 @@ default_args = {
 bucket = 'project-111111-bucket'
 filename = 'data/advertising/%s/*.parquet' % now  # project-111111-data/data/advertising
 
-# dag = DAG('gcs_to_bq_dag', default_args=default_args, schedule_interval='0 * * * *')  # 1시간마다
+# dag = DAG('gcs_to_bq_dag', default_args=default_args, schedule_interval='0 */1 * * *')  # 1시간마다
 dag = DAG('gcs_to_bq_dag', default_args=default_args, schedule_interval='@daily')
 
 gcsToBigQuery = GoogleCloudStorageToBigQueryOperator(

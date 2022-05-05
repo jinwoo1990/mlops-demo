@@ -137,4 +137,5 @@ experiments/todo.ipynb
 experiments/temp
 temp
 test_main.ipynb
-advert_pipeline/utils/test.ipynb
+pipelines/advert_pipeline/utils/test.ipynb
+pipelines/advert_pipeline/dashboard
