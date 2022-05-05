@@ -21,11 +21,13 @@ from pipeline import configs
 from pipeline import pipeline
 
 PIPELINE_ROOT = os.path.join('gs://', configs.GCS_PIPELINE_BUCKET_NAME, 'tfx_pipeline_output',
-                             configs.PIPELINE_NAME)
+                             configs.PIPELINE_NAME_BASE)
 # SERVING_MODEL_DIR = os.path.join(PIPELINE_ROOT, 'serving_model')
 SERVING_MODEL_NAME = 'advert_classifier'
 SERVING_MODEL_DIR = os.path.join('gs://', configs.GCS_SERVING_BUCKET_NAME, 'serving_model', SERVING_MODEL_NAME)  # Deploy 환경이 참조할 경로
-DATA_PATH = 'gs://{}/data/advertising/'.format(configs.GCS_DATA_BUCKET_NAME)
+# SCHEMA_PATH = None  # 처음에 None으로 Schema 생성하면서 파악
+SCHEMA_PATH = './schema/schema.pbtxt'  # gs://bucket/tfx_pipeline_output/advert_pipeline/SchemaGen/schema/116  # 정해진 Schema 불러오기
+# DATA_PATH = 'gs://{}/data/advertising/'.format(configs.GCS_DATA_BUCKET_NAME)
 
 
 def run():
@@ -65,7 +67,7 @@ def run():
 
     runner_config = tfx.orchestration.experimental.KubeflowDagRunnerConfig(
         kubeflow_metadata_config=metadata_config,
-        tfx_image=configs.PIPELINE_IMAGE)
+        tfx_image=configs.PIPELINE_IMAGE_TUNER)
     pod_labels = {
         'add-pod-env': 'true',
         tfx.orchestration.experimental.LABEL_KFP_SDK_ENV: 'tfx-test-1'
@@ -74,13 +76,14 @@ def run():
         config=runner_config, pod_labels_to_attach=pod_labels
     ).run(
         pipeline.create_pipeline(
-            pipeline_name=configs.PIPELINE_NAME,
+            pipeline_name=configs.PIPELINE_NAME_TUNER,
             pipeline_root=PIPELINE_ROOT,
             # data_path=DATA_PATH,
             query=configs.BIG_QUERY_QUERY,
-            # TODO: (Optional) Set the path of the customized schema.
-            # schema_path=generated_schema_path,
+            schema_path=SCHEMA_PATH,
+            tuner_flag=True,
             preprocessing_fn=configs.PREPROCESSING_FN,
+            tuner_fn=configs.TUNER_FN,
             run_fn=configs.RUN_FN,
             train_args=tfx.proto.TrainArgs(num_steps=configs.TRAIN_NUM_STEPS),
             eval_args=tfx.proto.EvalArgs(num_steps=configs.EVAL_NUM_STEPS),

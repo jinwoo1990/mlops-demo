@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import datetime
+from ast import literal_eval
 from pytz import timezone
 import tensorflow as tf
 import tensorflow_data_validation as tfdv
@@ -14,7 +15,16 @@ import gcsfs
 import json
 import re
 
-        
+
+# 참조
+# mlmd 다운그레이드
+# # https://github.com/google/ml-metadata/blob/master/g3doc/get_started.md (라이브러리, 스키마 호환버전 확인)
+# mlmd.downgrade_schema(
+#     config=connection_config,
+#     downgrade_to_schema_version=6
+# )
+
+    
 def parse_bucket_name_prefix(bucket_uri):
     pat = re.compile('gs:\/\/([\w\-\_]+)/(\S+)')
     mat = pat.search(bucket_uri)
@@ -149,6 +159,22 @@ def load_eval_config_from_uri(uri):
     with gcs_file_system.open(uri) as f:
         json_dict = json.load(f)
     return json_dict
+
+
+def load_hp_from_uri(uri):
+    if uri.startswith('gs://'):
+        bucket_name, uri_prefix = parse_bucket_name_prefix(uri)
+        client = storage.Client()
+        bucket = client.get_bucket(bucket_name)
+        blob = bucket.get_blob(os.path.join(uri_prefix, 'best_hyperparameters.txt'))
+        downloaded_file = blob.download_as_text(encoding="utf-8")
+    else:
+        uri_with_filename = os.path.join(uri, 'best_hyperparameters.txt')
+        downloaded_file = open(uri_with_filename, "r").readline()
+    modified_file = downloaded_file.replace('null', '"null"').replace('true', "True")
+    hp_dict = literal_eval(modified_file)
+    
+    return hp_dict
 
 
 def load_blessing_from_uri(uri):

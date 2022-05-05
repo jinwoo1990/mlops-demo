@@ -17,6 +17,8 @@ from typing import Any, Dict, List, Optional
 
 import tensorflow_model_analysis as tfma
 from tfx import v1 as tfx
+from tfx.v1.dsl import Importer
+from tfx.types.standard_artifacts import HyperParameters
 
 from google.protobuf import text_format
 from ml_metadata.proto import metadata_store_pb2
@@ -34,6 +36,8 @@ def create_pipeline(
     serving_model_dir: str,
     data_path: Optional[str] = None,
     schema_path: Optional[str] = None,
+    tuner_flag: Optional[bool] = None,
+    tuner_fn: Optional[str] = None,
     metadata_connection_config: Optional[
         metadata_store_pb2.ConnectionConfig] = None,
     beam_pipeline_args: Optional[List[str]] = None
@@ -75,13 +79,33 @@ def create_pipeline(
         schema=schema_gen.outputs['schema'],
         preprocessing_fn=preprocessing_fn)
     components.append(transform)
-
+    
+    # Tuning hyperparameters.
+    if tuner_flag == True:
+        tuner_args = {
+            'tuner_fn': tuner_fn,
+            'examples': transform.outputs['transformed_examples'],
+            'schema': schema_gen.outputs['schema'],
+            'transform_graph': transform.outputs['transform_graph'],
+            'train_args': train_args,
+            'eval_args': eval_args,
+        }
+        tuner = tfx.components.Tuner(**tuner_args)
+        components.append(tuner)
+    
     # Train a model.
+    # TODO: 확인
+    if tuner_flag == True:
+        hyperparameters = tuner.outputs['best_hyperparameters']
+    else:
+        hyperparameters = None
+    
     trainer_args = {
         'run_fn': run_fn,
         'examples': transform.outputs['transformed_examples'],
         'schema': schema_gen.outputs['schema'],
         'transform_graph': transform.outputs['transform_graph'],
+        'hyperparameters': hyperparameters,
         'train_args': train_args,
         'eval_args': eval_args,
     }
