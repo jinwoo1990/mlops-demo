@@ -43,6 +43,8 @@ MLOps Demo repository는 분석 주제별 production 레벨의 머신러닝 시�
 
 ## 시스템 구성
 
+### 전체 시스템 구성
+
 ![구현된 MLOps 시스템 도식화](./img/mlops-architecture.png)
 [그림 2] 구현된 MLOps 시스템 도식화 
 
@@ -53,6 +55,14 @@ MLOps Demo repository는 분석 주제별 production 레벨의 머신러닝 시�
 - GKE로 구성된 TFServing 서버에서 파이프라인에서 생성된 모델을 바탕으로 prediction 서비스를 제공합니다. 
 - 사용자는 Steramlit으로 만들어진 데모 UI에서 모델을 이용할 수 있습니다.
 
+### 예시 화면
+
+![Tuner 포함 Kubeflow pipeline 예시](./img/kubeflow-pipeline-with-tuner.png)
+[그림 3] Tuner 포함 Kubeflow pipeline 예시
+
+![Streamlit demo 화면 예시](./img/streamlit-demo.png)
+[그림 4] Streamlit demo 화면 예시
+
 
 ## 프로젝트 구성 
 
@@ -61,6 +71,7 @@ MLOps Demo repository는 분석 주제별 production 레벨의 머신러닝 시�
 #### 광고 클릭 예측 (Binary Classification)
 - advert_pipeline에 해당
 - 전체적인 production machine learning 시스템 구성 테스트를 위한 주제
+- Wide and deep network를 사용했으며, deep network 부분의 neural architecture를 Tuner를 활용해 optimize 
 
 나머지 주제 추후 업데이트 예정
 
